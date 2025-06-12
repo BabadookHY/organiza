@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organização de Evento - Network</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Organização do Evento de Network</h1>
+  </header>
+
+  <section>
+    <h2>Equipes e Representantes</h2>
+    <table id="tabela-equipes">
+      <thead>
+        <tr>
+          <th>Equipe</th>
+          <th>Integrantes</th>
+        </tr>
+      </thead>
+      <tbody contenteditable="true">
+        <tr>
+          <td>Planejamento</td>
+          <td>Eduarda, Anahlince, Bruno, Mikaelly</td>
+        </tr>
+        <tr>
+          <td>Coffee Break</td>
+          <td>Nome 1, Nome 2</td>
+        </tr>
+        <tr>
+          <td>Networking</td>
+          <td>Nome 3, Nome 4</td>
+        </tr>
+        <tr>
+          <td>Decoração</td>
+          <td>Nome 5, Nome 6</td>
+        </tr>
+      </tbody>
+    </table>
+    <p class="aviso">Clique nas células para editar ou remover diretamente.</p>
+  </section>
+
+  <section>
+    <h2>Adicionar Tarefa</h2>
+    <form id="form-tarefa">
+      <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
+      <input type="text" id="responsavel" placeholder="Responsável" required />
+      <input type="date" id="prazo" required />
+      <select id="status">
+        <option value="⏳ Pendente">⏳ Pendente</option>
+        <option value="🔄 Em andamento">🔄 Em andamento</option>
+        <option value="✅ Feito">✅ Feito</option>
+      </select>
+      <button type="submit">Adicionar</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Lista de Tarefas</h2>
+    <table id="tabela-tarefas">
+      <thead>
+        <tr>
+          <th>Tarefa</th>
+          <th>Responsável</th>
+          <th>Prazo</th>
+          <th>Status</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Tarefas vão aparecer aqui -->
+      </tbody>
+    </table>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

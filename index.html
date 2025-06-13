@@ -75,6 +75,25 @@
     </table>
   </section>
 
+<!-- Firebase App e Realtime Database -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "SUA_API_KEY",
+    authDomain: "SEU_PROJETO.firebaseapp.com",
+    databaseURL: "https://SEU_PROJETO.firebaseio.com",
+    projectId: "SEU_PROJETO",
+    storageBucket: "SEU_PROJETO.appspot.com",
+    messagingSenderId: "XXXXXXXX",
+    appId: "APP_ID"
+  };
+
+  const app = firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+</script>
+
   <script src="script.js"></script>
 </body>
 </html>

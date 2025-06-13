@@ -1,4 +1,4 @@
-// Referências Firebase
+// Referência Firebase
 const db = firebase.database();
 
 // Elementos DOM
@@ -10,9 +10,11 @@ const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelecto
 // Função para carregar equipes do Firebase e popular select e tabela
 function carregarEquipes() {
   db.ref('equipes').on('value', snapshot => {
-    const equipes = snapshot.val();
+    const equipes = snapshot.val() || {};
     selectEquipe.innerHTML = '<option value="" disabled selected>Selecione a equipe</option>';
     tabelaEquipesBody.innerHTML = '';
+
+    let primeiraEquipeId = null;
 
     for (const equipeId in equipes) {
       const equipe = equipes[equipeId];
@@ -24,17 +26,26 @@ function carregarEquipes() {
       selectEquipe.appendChild(option);
 
       // Popula a tabela de equipes
-      const tr = document.createElement('tr');
-
-      // Membros viram string separados por vírgula
       const membrosStr = equipe.membros ? equipe.membros.join(', ') : '';
+      const representante = equipe.representante || '';
 
+      const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${equipe.nome}</td>
+        <td>${equipe.nome} <br><small><strong>Representante:</strong> ${representante}</small></td>
         <td contenteditable="true" data-equipeid="${equipeId}">${membrosStr}</td>
       `;
 
       tabelaEquipesBody.appendChild(tr);
+
+      if (!primeiraEquipeId) primeiraEquipeId = equipeId;
+    }
+
+    // Seleciona a primeira equipe e carrega as tarefas dela
+    if (primeiraEquipeId) {
+      selectEquipe.value = primeiraEquipeId;
+      carregarTarefas(primeiraEquipeId);
+    } else {
+      tabelaTarefas.innerHTML = ''; // limpa tabela se não tiver equipes
     }
   });
 }
@@ -116,5 +127,6 @@ tabelaTarefas.addEventListener('click', e => {
   }
 });
 
-// Carregar equipes na inicialização
+// Chama o carregamento inicial das equipes
 carregarEquipes();
+

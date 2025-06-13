@@ -46,6 +46,23 @@
     <h2>Adicionar Tarefa</h2>
     <form id="form-tarefa">
       <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
+<form id="form-tarefa">
+  <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
+  
+  <select id="select-equipe" required>
+    <option value="" disabled selected>Selecione a equipe</option>
+  </select>
+  
+  <input type="text" id="responsavel" placeholder="Responsável" required />
+  <input type="date" id="prazo" required />
+  <select id="status">
+    <option value="⏳ Pendente">⏳ Pendente</option>
+    <option value="🔄 Em andamento">🔄 Em andamento</option>
+    <option value="✅ Feito">✅ Feito</option>
+  </select>
+  <button type="submit">Adicionar</button>
+</form>
+
       <input type="text" id="responsavel" placeholder="Responsável" required />
       <input type="date" id="prazo" required />
       <select id="status">

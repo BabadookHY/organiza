@@ -1,132 +1,205 @@
-// Referência Firebase
-const db = firebase.database();
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Organização de Evento - Network</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Organização do Evento de Network</h1>
+  </header>
 
-// Elementos DOM
-const form = document.getElementById('form-tarefa');
-const tabelaTarefas = document.getElementById('tabela-tarefas').querySelector('tbody');
-const selectEquipe = document.getElementById('select-equipe');
-const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
+  <section>
+    <h2>Equipes e Representantes</h2>
+    <table id="tabela-equipes">
+      <thead>
+        <tr>
+          <th>Equipe</th>
+          <th>Integrantes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Equipes carregadas dinamicamente -->
+      </tbody>
+    </table>
+    <p class="aviso">Clique nas células para editar os integrantes. A mudança será salva automaticamente.</p>
+  </section>
 
-// Função para carregar equipes do Firebase e popular select e tabela
-function carregarEquipes() {
-  db.ref('equipes').on('value', snapshot => {
-    const equipes = snapshot.val() || {};
-    selectEquipe.innerHTML = '<option value="" disabled selected>Selecione a equipe</option>';
-    tabelaEquipesBody.innerHTML = '';
+  <section>
+    <h2>Adicionar Tarefa</h2>
+    <form id="form-tarefa">
+      <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
+      <select id="select-equipe" required>
+        <option value="" disabled selected>Selecione a equipe</option>
+      </select>
+      <input type="text" id="responsavel" placeholder="Responsável" required />
+      <input type="date" id="prazo" required />
+      <select id="status">
+        <option value="⏳ Pendente">⏳ Pendente</option>
+        <option value="🔄 Em andamento">🔄 Em andamento</option>
+        <option value="✅ Feito">✅ Feito</option>
+      </select>
+      <button type="submit">Adicionar</button>
+    </form>
+  </section>
 
-    let primeiraEquipeId = null;
+  <section>
+    <h2>Lista de Tarefas</h2>
+    <table id="tabela-tarefas">
+      <thead>
+        <tr>
+          <th>Tarefa</th>
+          <th>Responsável</th>
+          <th>Prazo</th>
+          <th>Status</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Tarefas carregadas dinamicamente -->
+      </tbody>
+    </table>
+  </section>
 
-    for (const equipeId in equipes) {
-      const equipe = equipes[equipeId];
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 
-      // Popula o select
-      const option = document.createElement('option');
-      option.value = equipeId;
-      option.textContent = equipe.nome;
-      selectEquipe.appendChild(option);
+  <script>
+    const firebaseConfig = {
+      apiKey: "SUA_API_KEY",
+      authDomain: "SEU_PROJETO.firebaseapp.com",
+      databaseURL: "https://SEU_PROJETO.firebaseio.com",
+      projectId: "SEU_PROJETO",
+      storageBucket: "SEU_PROJETO.appspot.com",
+      messagingSenderId: "XXXXXXXX",
+      appId: "APP_ID"
+    };
 
-      // Popula a tabela de equipes
-      const membrosStr = equipe.membros ? equipe.membros.join(', ') : '';
-      const representante = equipe.representante || '';
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${equipe.nome} <br><small><strong>Representante:</strong> ${representante}</small></td>
-        <td contenteditable="true" data-equipeid="${equipeId}">${membrosStr}</td>
-      `;
+    const form = document.getElementById('form-tarefa');
+    const tabelaTarefas = document.getElementById('tabela-tarefas').querySelector('tbody');
+    const selectEquipe = document.getElementById('select-equipe');
+    const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
 
-      tabelaEquipesBody.appendChild(tr);
+    function carregarEquipes() {
+      db.ref('equipes').on('value', snapshot => {
+        const equipes = snapshot.val() || {};
+        selectEquipe.innerHTML = '<option value="" disabled selected>Selecione a equipe</option>';
+        tabelaEquipesBody.innerHTML = '';
 
-      if (!primeiraEquipeId) primeiraEquipeId = equipeId;
+        let primeiraEquipeId = null;
+
+        for (const equipeId in equipes) {
+          const equipe = equipes[equipeId];
+          const option = document.createElement('option');
+          option.value = equipeId;
+          option.textContent = equipe.nome;
+          selectEquipe.appendChild(option);
+
+          const membrosStr = equipe.membros ? equipe.membros.join(', ') : '';
+          const representante = equipe.representante || '';
+
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${equipe.nome} <br><small><strong>Representante:</strong> ${representante}</small></td>
+            <td contenteditable="true" data-equipeid="${equipeId}">${membrosStr}</td>
+          `;
+
+          // Evento de salvamento ao perder o foco
+          tr.querySelector('[contenteditable]').addEventListener('blur', (e) => {
+            const texto = e.target.textContent.trim();
+            const membros = texto.split(',').map(m => m.trim()).filter(Boolean);
+            const id = e.target.dataset.equipeid;
+            db.ref(`equipes/${id}/membros`).set(membros);
+          });
+
+          tabelaEquipesBody.appendChild(tr);
+
+          if (!primeiraEquipeId) primeiraEquipeId = equipeId;
+        }
+
+        if (primeiraEquipeId) {
+          selectEquipe.value = primeiraEquipeId;
+          carregarTarefas(primeiraEquipeId);
+        } else {
+          tabelaTarefas.innerHTML = '';
+        }
+      });
     }
 
-    // Seleciona a primeira equipe e carrega as tarefas dela
-    if (primeiraEquipeId) {
-      selectEquipe.value = primeiraEquipeId;
-      carregarTarefas(primeiraEquipeId);
-    } else {
-      tabelaTarefas.innerHTML = ''; // limpa tabela se não tiver equipes
+    function carregarTarefas(equipeId) {
+      if (!equipeId) {
+        tabelaTarefas.innerHTML = '';
+        return;
+      }
+
+      db.ref(`equipes/${equipeId}/tarefas`).on('value', snapshot => {
+        tabelaTarefas.innerHTML = '';
+        const tarefas = snapshot.val();
+
+        if (!tarefas) return;
+
+        for (const tarefaId in tarefas) {
+          const t = tarefas[tarefaId];
+          const tr = document.createElement('tr');
+          tr.dataset.tarefaId = tarefaId;
+
+          tr.innerHTML = `
+            <td contenteditable="true">${t.descricao}</td>
+            <td contenteditable="true">${t.responsavel}</td>
+            <td contenteditable="true">${t.prazo}</td>
+            <td contenteditable="true">${t.status}</td>
+            <td><button class="excluir">Excluir</button></td>
+          `;
+
+          tabelaTarefas.appendChild(tr);
+        }
+      });
     }
-  });
-}
 
-// Função para carregar tarefas da equipe selecionada
-function carregarTarefas(equipeId) {
-  if (!equipeId) {
-    tabelaTarefas.innerHTML = '';
-    return;
-  }
+    selectEquipe.addEventListener('change', () => {
+      carregarTarefas(selectEquipe.value);
+    });
 
-  db.ref(`equipes/${equipeId}/tarefas`).on('value', snapshot => {
-    tabelaTarefas.innerHTML = '';
-    const tarefas = snapshot.val();
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
 
-    if (!tarefas) return;
+      const descricao = document.getElementById('tarefa').value.trim();
+      const responsavel = document.getElementById('responsavel').value.trim();
+      const prazo = document.getElementById('prazo').value;
+      const status = document.getElementById('status').value;
+      const equipeId = selectEquipe.value;
 
-    for (const tarefaId in tarefas) {
-      const t = tarefas[tarefaId];
-      const tr = document.createElement('tr');
-      tr.dataset.tarefaId = tarefaId;
+      if (!equipeId) {
+        alert('Selecione uma equipe!');
+        return;
+      }
 
-      tr.innerHTML = `
-        <td contenteditable="true">${t.descricao}</td>
-        <td contenteditable="true">${t.responsavel}</td>
-        <td contenteditable="true">${t.prazo}</td>
-        <td contenteditable="true">${t.status}</td>
-        <td><button class="excluir">Excluir</button></td>
-      `;
+      const novaTarefaRef = db.ref(`equipes/${equipeId}/tarefas`).push();
 
-      tabelaTarefas.appendChild(tr);
-    }
-  });
-}
+      novaTarefaRef.set({ descricao, responsavel, prazo, status });
 
-// Evento ao mudar seleção da equipe
-selectEquipe.addEventListener('change', () => {
-  carregarTarefas(selectEquipe.value);
-});
+      form.reset();
+    });
 
-// Evento ao enviar formulário para adicionar tarefa
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
+    tabelaTarefas.addEventListener('click', e => {
+      if (e.target.classList.contains('excluir')) {
+        const tr = e.target.closest('tr');
+        const tarefaId = tr.dataset.tarefaId;
+        const equipeId = selectEquipe.value;
 
-  const descricao = document.getElementById('tarefa').value.trim();
-  const responsavel = document.getElementById('responsavel').value.trim();
-  const prazo = document.getElementById('prazo').value;
-  const status = document.getElementById('status').value;
-  const equipeId = selectEquipe.value;
+        if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+          db.ref(`equipes/${equipeId}/tarefas/${tarefaId}`).remove();
+        }
+      }
+    });
 
-  if (!equipeId) {
-    alert('Selecione uma equipe!');
-    return;
-  }
-
-  // Cria uma nova tarefa no Firebase
-  const novaTarefaRef = db.ref(`equipes/${equipeId}/tarefas`).push();
-
-  novaTarefaRef.set({
-    descricao,
-    responsavel,
-    prazo,
-    status
-  });
-
-  form.reset();
-});
-
-// Evento para excluir tarefa
-tabelaTarefas.addEventListener('click', e => {
-  if (e.target.classList.contains('excluir')) {
-    const tr = e.target.closest('tr');
-    const tarefaId = tr.dataset.tarefaId;
-    const equipeId = selectEquipe.value;
-
-    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-      db.ref(`equipes/${equipeId}/tarefas/${tarefaId}`).remove();
-    }
-  }
-});
-
-// Chama o carregamento inicial das equipes
-carregarEquipes();
-
+    carregarEquipes();
+  </script>
+</body>
+</html>

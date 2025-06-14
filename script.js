@@ -158,3 +158,27 @@ tabelaEquipesBody.addEventListener('blur', (e) => {
   }
 }, true);
 
+// Formulário de criação de equipe
+document.getElementById('form-equipe').addEventListener('submit', (e) => {
+  e.preventDefault();
+
+  const nome = document.getElementById('nome-equipe').value.trim();
+  const integrantesStr = document.getElementById('integrantes-equipe').value.trim();
+  const representante = document.getElementById('representante-equipe').value.trim();
+
+  if (!nome || !integrantesStr) {
+    alert("Preencha o nome da equipe e os integrantes.");
+    return;
+  }
+
+  const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
+
+  const novaEquipeRef = db.ref('equipes').push();
+  novaEquipeRef.set({
+    nome,
+    membros,
+    representante
+  });
+
+  e.target.reset(); // limpa o formulário
+});

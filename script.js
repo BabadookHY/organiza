@@ -81,12 +81,12 @@ function carregarTarefas(equipeId) {
   });
 }
 
-// Evento ao mudar seleção da equipe
+// mudar seleção da equipe
 selectEquipe.addEventListener('change', () => {
   carregarTarefas(selectEquipe.value);
 });
 
-// Evento ao enviar formulário para adicionar tarefa
+// enviar formulário para adicionar tarefa
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -127,7 +127,6 @@ tabelaTarefas.addEventListener('click', e => {
   }
 });
 
-// ✅ NOVO: salvar edições de membros da equipe automaticamente no Firebase
 tabelaEquipesBody.addEventListener('blur', (e) => {
   const cell = e.target;
   if (cell.matches('td[contenteditable="true"][data-equipeid]')) {
@@ -142,3 +141,20 @@ tabelaEquipesBody.addEventListener('blur', (e) => {
 
 // Chama o carregamento inicial das equipes
 carregarEquipes();
+
+tabelaEquipesBody.addEventListener('blur', (e) => {
+  const cell = e.target;
+  const equipeId = cell.dataset.equipeid;
+  const tipo = cell.dataset.tipo; // "membros" ou "representante"
+  const texto = cell.innerText.trim();
+
+  if (!equipeId || !tipo) return;
+
+  if (tipo === 'membros') {
+    const listaMembros = texto.split(',').map(m => m.trim()).filter(Boolean);
+    db.ref(`equipes/${equipeId}/membros`).set(listaMembros);
+  } else if (tipo === 'representante') {
+    db.ref(`equipes/${equipeId}/representante`).set(texto);
+  }
+}, true);
+

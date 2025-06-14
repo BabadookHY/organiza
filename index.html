@@ -18,13 +18,14 @@
         <tr>
           <th>Equipe</th>
           <th>Integrantes</th>
+          <th>Representante</th>
         </tr>
       </thead>
       <tbody>
-        <!-- Equipes carregadas dinamicamente -->
+
       </tbody>
     </table>
-    <p class="aviso">Clique nas células para editar os integrantes. A mudança será salva automaticamente.</p>
+    <p class="aviso">Clique nas células para editar os integrantes ou representante. As mudanças serão salvas automaticamente.</p>
   </section>
 
   <section>
@@ -58,12 +59,11 @@
         </tr>
       </thead>
       <tbody>
-        <!-- Tarefas carregadas dinamicamente -->
+
       </tbody>
     </table>
   </section>
 
-  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js"></script>
 
@@ -106,16 +106,25 @@
 
           const tr = document.createElement('tr');
           tr.innerHTML = `
-            <td>${equipe.nome} <br><small><strong>Representante:</strong> ${representante}</small></td>
-            <td contenteditable="true" data-equipeid="${equipeId}">${membrosStr}</td>
+            <td>${equipe.nome}</td>
+            <td contenteditable="true" data-tipo="membros" data-equipeid="${equipeId}">${membrosStr}</td>
+            <td contenteditable="true" data-tipo="representante" data-equipeid="${equipeId}">${representante}</td>
           `;
 
-          // Evento de salvamento ao perder o foco
-          tr.querySelector('[contenteditable]').addEventListener('blur', (e) => {
-            const texto = e.target.textContent.trim();
-            const membros = texto.split(',').map(m => m.trim()).filter(Boolean);
-            const id = e.target.dataset.equipeid;
-            db.ref(`equipes/${id}/membros`).set(membros);
+          // Eventos de edição (membros ou representante)
+          tr.querySelectorAll('[contenteditable]').forEach(cell => {
+            cell.addEventListener('blur', (e) => {
+              const tipo = e.target.dataset.tipo;
+              const id = e.target.dataset.equipeid;
+              const valor = e.target.textContent.trim();
+
+              if (tipo === 'membros') {
+                const membros = valor.split(',').map(m => m.trim()).filter(Boolean);
+                db.ref(`equipes/${id}/membros`).set(membros);
+              } else if (tipo === 'representante') {
+                db.ref(`equipes/${id}/representante`).set(valor);
+              }
+            });
           });
 
           tabelaEquipesBody.appendChild(tr);

@@ -11,15 +11,15 @@
     <h1>Organização do Evento de Network</h1>
   </header>
 
-<section>
-  <h2>Criar Nova Equipe</h2>
-  <form id="form-equipe">
-    <input type="text" id="nome-equipe" placeholder="Nome da equipe" required />
-    <input type="text" id="integrantes-equipe" placeholder="Integrantes (separados por vírgula)" required />
-    <input type="text" id="representante-equipe" placeholder="Representante (opcional)" />
-    <button type="submit">Criar Equipe</button>
-  </form>
-</section>
+  <section>
+    <h2>Criar Nova Equipe</h2>
+    <form id="form-equipe">
+      <input type="text" id="nome-equipe" placeholder="Nome da equipe" required />
+      <input type="text" id="integrantes-equipe" placeholder="Integrantes (separados por vírgula)" required />
+      <input type="text" id="representante-equipe" placeholder="Representante (opcional)" />
+      <button type="submit">Criar Equipe</button>
+    </form>
+  </section>
 
   <section>
     <h2>Equipes e Representantes</h2>
@@ -31,9 +31,7 @@
           <th>Representante</th>
         </tr>
       </thead>
-      <tbody>
-
-      </tbody>
+      <tbody></tbody>
     </table>
     <p class="aviso">Clique nas células para editar os integrantes ou representante. As mudanças serão salvas automaticamente.</p>
   </section>
@@ -68,9 +66,7 @@
           <th>Ação</th>
         </tr>
       </thead>
-      <tbody>
-
-      </tbody>
+      <tbody></tbody>
     </table>
   </section>
 
@@ -96,6 +92,7 @@
     const selectEquipe = document.getElementById('select-equipe');
     const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
 
+    // 🟣 Carrega equipes da base e exibe na tabela + select
     function carregarEquipes() {
       db.ref('equipes').on('value', snapshot => {
         const equipes = snapshot.val() || {};
@@ -121,7 +118,6 @@
             <td contenteditable="true" data-tipo="representante" data-equipeid="${equipeId}">${representante}</td>
           `;
 
-          // Eventos de edição (membros ou representante)
           tr.querySelectorAll('[contenteditable]').forEach(cell => {
             cell.addEventListener('blur', (e) => {
               const tipo = e.target.dataset.tipo;
@@ -138,7 +134,6 @@
           });
 
           tabelaEquipesBody.appendChild(tr);
-
           if (!primeiraEquipeId) primeiraEquipeId = equipeId;
         }
 
@@ -161,7 +156,7 @@
         tabelaTarefas.innerHTML = '';
         const tarefas = snapshot.val();
 
-        if (!tarefas) return;
+        if (! tarefas) return;
 
         for (const tarefaId in tarefas) {
           const t = tarefas[tarefaId];
@@ -200,7 +195,6 @@
       }
 
       const novaTarefaRef = db.ref(`equipes/${equipeId}/tarefas`).push();
-
       novaTarefaRef.set({ descricao, responsavel, prazo, status });
 
       form.reset();
@@ -218,8 +212,28 @@
       }
     });
 
+    // 
+    document.getElementById('form-equipe').addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const nome = document.getElementById('nome-equipe').value.trim();
+      const integrantesStr = document.getElementById('integrantes-equipe').value.trim();
+      const representante = document.getElementById('representante-equipe').value.trim();
+
+      if (!nome || !integrantesStr) {
+        alert('Preencha o nome da equipe e os integrantes.');
+        return;
+      }
+
+      const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
+
+      const novaEquipeRef = db.ref('equipes').push();
+      novaEquipeRef.set({ nome, membros, representante });
+
+      e.target.reset();
+    });
+
     carregarEquipes();
   </script>
 </body>
 </html>
-

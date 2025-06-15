@@ -1,13 +1,11 @@
-// Referência Firebase
 const db = firebase.database();
 
-// Elementos DOM
 const form = document.getElementById('form-tarefa');
 const tabelaTarefas = document.getElementById('tabela-tarefas').querySelector('tbody');
 const selectEquipe = document.getElementById('select-equipe');
 const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
 
-// Função para carregar equipes do Firebase e popular select e tabela
+// Carrega as equipes e atualiza o select e tabela
 function carregarEquipes() {
   db.ref('equipes').on('value', snapshot => {
     const equipes = snapshot.val() || {};
@@ -19,38 +17,33 @@ function carregarEquipes() {
     for (const equipeId in equipes) {
       const equipe = equipes[equipeId];
 
-      // Popula o select
       const option = document.createElement('option');
       option.value = equipeId;
       option.textContent = equipe.nome;
       selectEquipe.appendChild(option);
 
-      // Popula a tabela de equipes
       const membrosStr = equipe.membros ? equipe.membros.join(', ') : '';
       const representante = equipe.representante || '';
 
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${equipe.nome} <br><small><strong>Representante:</strong> ${representante}</small></td>
-        <td contenteditable="true" data-equipeid="${equipeId}">${membrosStr}</td>
+        <td>${equipe.nome}</td>
+        <td contenteditable="true" data-tipo="membros" data-equipeid="${equipeId}">${membrosStr}</td>
+        <td contenteditable="true" data-tipo="representante" data-equipeid="${equipeId}">${representante}</td>
       `;
-
       tabelaEquipesBody.appendChild(tr);
-
-      if (!primeiraEquipeId) primeiraEquipeId = equipeId;
     }
 
-    // Seleciona a primeira equipe e carrega as tarefas dela
-    if (primeiraEquipeId) {
-      selectEquipe.value = primeiraEquipeId;
-      carregarTarefas(primeiraEquipeId);
+    if (Object.keys(equipes).length > 0) {
+      const primeiraId = Object.keys(equipes)[0];
+      selectEquipe.value = primeiraId;
+      carregarTarefas(primeiraId);
     } else {
-      tabelaTarefas.innerHTML = ''; // limpa tabela se não tiver equipes
+      tabelaTarefas.innerHTML = '';
     }
   });
 }
 
-// Função para carregar tarefas da equipe selecionada
 function carregarTarefas(equipeId) {
   if (!equipeId) {
     tabelaTarefas.innerHTML = '';
@@ -81,12 +74,10 @@ function carregarTarefas(equipeId) {
   });
 }
 
-// mudar seleção da equipe
 selectEquipe.addEventListener('change', () => {
   carregarTarefas(selectEquipe.value);
 });
 
-// enviar formulário para adicionar tarefa
 form.addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -101,20 +92,12 @@ form.addEventListener('submit', (e) => {
     return;
   }
 
-  // Cria uma nova tarefa no Firebase
   const novaTarefaRef = db.ref(`equipes/${equipeId}/tarefas`).push();
-
-  novaTarefaRef.set({
-    descricao,
-    responsavel,
-    prazo,
-    status
-  });
+  novaTarefaRef.set({ descricao, responsavel, prazo, status });
 
   form.reset();
 });
 
-// Evento para excluir tarefa
 tabelaTarefas.addEventListener('click', e => {
   if (e.target.classList.contains('excluir')) {
     const tr = e.target.closest('tr');
@@ -127,25 +110,11 @@ tabelaTarefas.addEventListener('click', e => {
   }
 });
 
-tabelaEquipesBody.addEventListener('blur', (e) => {
-  const cell = e.target;
-  if (cell.matches('td[contenteditable="true"][data-equipeid]')) {
-    const equipeId = cell.dataset.equipeid;
-    const texto = cell.innerText.trim();
-
-    const listaMembros = texto.split(',').map(m => m.trim()).filter(Boolean);
-
-    db.ref(`equipes/${equipeId}/membros`).set(listaMembros);
-  }
-}, true);
-
-// Chama o carregamento inicial das equipes
-carregarEquipes();
-
+// Edição dos membros e representantes
 tabelaEquipesBody.addEventListener('blur', (e) => {
   const cell = e.target;
   const equipeId = cell.dataset.equipeid;
-  const tipo = cell.dataset.tipo; // "membros" ou "representante"
+  const tipo = cell.dataset.tipo;
   const texto = cell.innerText.trim();
 
   if (!equipeId || !tipo) return;
@@ -158,7 +127,7 @@ tabelaEquipesBody.addEventListener('blur', (e) => {
   }
 }, true);
 
-// Formulário de criação de equipe
+// Criação de nova equipe
 document.getElementById('form-equipe').addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -174,11 +143,9 @@ document.getElementById('form-equipe').addEventListener('submit', (e) => {
   const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
 
   const novaEquipeRef = db.ref('equipes').push();
-  novaEquipeRef.set({
-    nome,
-    membros,
-    representante
-  });
+  novaEquipeRef.set({ nome, membros, representante });
 
-  e.target.reset(); // limpa o formulário
+  e.target.reset();
 });
+
+carregarEquipes();

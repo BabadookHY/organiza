@@ -50,6 +50,19 @@ header {
   vertical-align: middle;
 }
 
+.excluir-equipe {
+  background-color: #d9534f;
+  color: white;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.excluir-equipe:hover {
+  background-color: #c9302c;
+}
+
 /* Ajustes para celular */
 @media (max-width: 600px) {
   .logo-decorada {

@@ -12,6 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+// Inserir equipes iniciais
 const equipesIniciais = [
   {
     nome: "Planejamento",
@@ -35,7 +36,6 @@ const equipesIniciais = [
   }
 ];
 
-// Inserir equipes iniciais na base se não existirem
 function inserirEquipesIniciais() {
   db.ref("equipes").once("value", (snapshot) => {
     if (!snapshot.exists()) {
@@ -45,14 +45,27 @@ function inserirEquipesIniciais() {
     }
   });
 }
-
 inserirEquipesIniciais();
 
+// DOM
 const form = document.getElementById('form-tarefa');
 const tabelaTarefas = document.getElementById('tabela-tarefas').querySelector('tbody');
 const selectEquipe = document.getElementById('select-equipe');
 const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
 
+// Excluir equipe
+tabelaEquipesBody.addEventListener('click', (e) => {
+  if (e.target.classList.contains('excluir-equipe')) {
+    const equipeId = e.target.dataset.equipeid;
+    const confirmar = confirm('Tem certeza que deseja excluir essa equipe e todas as tarefas dela?');
+
+    if (confirmar) {
+      db.ref(`equipes/${equipeId}`).remove();
+    }
+  }
+});
+
+// Carrega equipes
 function carregarEquipes() {
   db.ref('equipes').on('value', snapshot => {
     const equipes = snapshot.val() || {};
@@ -76,6 +89,7 @@ function carregarEquipes() {
         <td>${equipe.nome}</td>
         <td contenteditable="true" data-tipo="membros" data-equipeid="${equipeId}">${membrosStr}</td>
         <td contenteditable="true" data-tipo="representante" data-equipeid="${equipeId}">${representante}</td>
+        <td><button class="excluir-equipe" data-equipeid="${equipeId}">Excluir</button></td>
       `;
 
       tr.querySelectorAll('[contenteditable]').forEach(cell => {
@@ -106,6 +120,7 @@ function carregarEquipes() {
   });
 }
 
+// Carrega tarefas
 function carregarTarefas(equipeId) {
   if (!equipeId) {
     tabelaTarefas.innerHTML = '';
@@ -185,7 +200,6 @@ document.getElementById('form-equipe').addEventListener('submit', (e) => {
   }
 
   const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
-
   const novaEquipeRef = db.ref('equipes').push();
   novaEquipeRef.set({ nome, membros, representante });
 

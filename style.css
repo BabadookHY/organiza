@@ -1,29 +1,42 @@
 body {
-  font-family: Arial, sans-serif;
-  background-color: #f9f9f9;
-  color: #333;
+  font-family: 'Trebuchet MS', sans-serif;
+  background-color: #fffaf0; /* tom claro tipo palha */
+  color: #3e2f1c;
   margin: 0;
   padding: 20px;
+  background-image: url('https://i.imgur.com/r9TOAr2.png');
+  background-size: 80px;
 }
 
 header {
   text-align: center;
   margin-bottom: 30px;
+  background-color: #f28b30; /* laranja queimado */
+  padding: 20px;
+  border-radius: 10px;
+  color: white;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
 h1 {
-  color: #333;
+  font-size: 2em;
+  margin: 0;
+  color: white;
 }
 
 h2 {
-  color: #444;
-  border-bottom: 2px solid #aaa;
+  color: #8b4513;
+  border-bottom: 2px dashed #d2691e;
   padding-bottom: 5px;
   margin-top: 40px;
 }
 
 section {
   margin-bottom: 30px;
+  background-color: #fff8e7;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 table {
@@ -34,13 +47,14 @@ table {
 }
 
 th, td {
-  border: 1px solid #ddd;
+  border: 1px solid #ccc;
   padding: 10px;
   text-align: left;
 }
 
 th {
-  background-color: #efefef;
+  background-color: #f9d67a; /* amarelo pastel */
+  color: #5c3d1d;
 }
 
 input[type="text"],
@@ -50,11 +64,13 @@ select {
   margin: 5px 10px 10px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
+  background-color: #fffdf7;
+  color: #3e2f1c;
 }
 
 button {
   padding: 8px 15px;
-  background-color: #888;
+  background-color: #e67300;
   color: white;
   border: none;
   border-radius: 4px;
@@ -62,7 +78,7 @@ button {
 }
 
 button:hover {
-  background-color: #666;
+  background-color: #cc5c00;
 }
 
 button.excluir {
@@ -77,4 +93,14 @@ button.excluir:hover {
   font-size: 0.9em;
   color: #666;
   margin-top: 5px;
+  font-style: italic;
+}
+
+section {
+  border: 2px dashed #ffa500;
+}
+
+input::placeholder {
+  color: #a87b4a;
+  opacity: 0.8;
 }

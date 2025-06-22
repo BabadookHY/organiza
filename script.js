@@ -258,3 +258,16 @@ formCronograma.addEventListener('submit', e => {
 // Inicializa tudo
 carregarEquipes();
 carregarCronograma();
+
+document.getElementById("gerar-pdf").addEventListener("click", () => {
+  const elementoParaPDF = document.body; // pode trocar por uma div específica se quiser
+  const opcoes = {
+    margin: 0.3,
+    filename: 'resumo-evento-network.pdf',
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+  };
+  html2pdf().set(opcoes).from(elementoParaPDF).save();
+});
+

@@ -21,18 +21,22 @@ header {
 
 .logo-decorada {
   font-family: 'Rubik Mono One', sans-serif;
-  font-size: 2.8em;
-  color: #4b1e00; /* marrom escuro */
+  font-size: 2.5em;
+  color: #4b1e00;
   text-align: center;
-  letter-spacing: 6px;
+  letter-spacing: 4px;
   margin-bottom: 10px;
   text-transform: uppercase;
-  position: relative;
   background-color: #fff0dc;
-  padding: 20px 10px;
-  border: 4px double #8b4513;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  padding: 10px;
+  border: 3px double #8b4513;
+  border-radius: 8px;
+  box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .organiza-texto {
@@ -41,17 +45,28 @@ header {
 }
 
 .risco {
-  font-size: 1.5em;
+  font-size: 1.2em;
   color: #ffb347;
-  margin: 0 15px;
   vertical-align: middle;
 }
 
+/* Ajustes para celular */
+@media (max-width: 600px) {
+  .logo-decorada {
+    font-size: 1.6em;
+    padding: 8px;
+    letter-spacing: 2px;
+    gap: 5px;
+  }
 
-h1 {
-  font-size: 2em;
-  margin: 0;
-  color: white;
+  .risco {
+    display: none;
+  }
+
+  header h1 {
+    font-size: 1.2em;
+    margin-top: 10px;
+  }
 }
 
 h2 {

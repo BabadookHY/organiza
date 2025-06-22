@@ -15,85 +15,106 @@
     <span class="risco">✦</span>
   </div>
   <h1>Organização do Evento de Network</h1>
-<nav>
-  <a href="#brincadeiras">Brincadeiras</a>
-</nav>
-
+  <nav>
+    <a href="#brincadeiras">Brincadeiras</a>
+    <a href="#cronograma">Cronograma</a>
+  </nav>
 </header>
 
-  <section>
-    <h2>Criar Nova Equipe</h2>
-    <form id="form-equipe">
-      <input type="text" id="nome-equipe" placeholder="Nome da equipe" required />
-      <input type="text" id="integrantes-equipe" placeholder="Integrantes (separados por vírgula)" required />
-      <input type="text" id="representante-equipe" placeholder="Representante (opcional)" />
-      <button type="submit">Criar Equipe</button>
-    </form>
-  </section>
+<section>
+  <h2>Criar Nova Equipe</h2>
+  <form id="form-equipe">
+    <input type="text" id="nome-equipe" placeholder="Nome da equipe" required />
+    <input type="text" id="integrantes-equipe" placeholder="Integrantes (separados por vírgula)" required />
+    <input type="text" id="representante-equipe" placeholder="Representante (opcional)" />
+    <button type="submit">Criar Equipe</button>
+  </form>
+</section>
 
-  <section>
-    <h2>Equipes e Representantes</h2>
-    <table id="tabela-equipes">
-      <thead>
-  <tr>
-    <th>Equipe</th>
-    <th>Integrantes</th>
-    <th>Representante</th>
-    <th>Ação</th> <!-- NOVO -->
-  </tr>
-</thead>
-      <tbody></tbody>
-    </table>
-    <p class="aviso">Clique nas células para editar os integrantes ou representante. As mudanças serão salvas automaticamente.</p>
-  </section>
+<section>
+  <h2>Equipes e Representantes</h2>
+  <table id="tabela-equipes">
+    <thead>
+      <tr>
+        <th>Equipe</th>
+        <th>Integrantes</th>
+        <th>Representante</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p class="aviso">Clique nas células para editar os integrantes ou representante. As mudanças serão salvas automaticamente.</p>
+</section>
 
-  <section>
-    <h2>Adicionar Tarefa</h2>
-    <form id="form-tarefa">
-      <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
-      <select id="select-equipe" required>
-        <option value="" disabled selected>Selecione a equipe</option>
-      </select>
-      <input type="text" id="responsavel" placeholder="Responsável" required />
-      <input type="date" id="prazo" required />
-      <select id="status">
-        <option value="⏳ Pendente">⏳ Pendente</option>
-        <option value="🔄 Em andamento">🔄 Em andamento</option>
-        <option value="✅ Feito">✅ Feito</option>
-      </select>
-      <button type="submit">Adicionar</button>
-    </form>
-  </section>
+<section>
+  <h2>Adicionar Tarefa</h2>
+  <form id="form-tarefa">
+    <input type="text" id="tarefa" placeholder="Descrição da tarefa" required />
+    <select id="select-equipe" required>
+      <option value="" disabled selected>Selecione a equipe</option>
+    </select>
+    <input type="text" id="responsavel" placeholder="Responsável" required />
+    <input type="date" id="prazo" required />
+    <select id="status">
+      <option value="⏳ Pendente">⏳ Pendente</option>
+      <option value="🔄 Em andamento">🔄 Em andamento</option>
+      <option value="✅ Feito">✅ Feito</option>
+    </select>
+    <button type="submit">Adicionar</button>
+  </form>
+</section>
 
-  <section id="Tarefas">
-    <h2>Lista de Tarefas</h2>
-    <table id="tabela-tarefas">
-      <thead>
-        <tr>
-          <th>Tarefa</th>
-          <th>Responsável</th>
-          <th>Prazo</th>
-          <th>Status</th>
-          <th>Ação</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
+<section id="Tarefas">
+  <h2>Lista de Tarefas</h2>
+  <table id="tabela-tarefas">
+    <thead>
+      <tr>
+        <th>Tarefa</th>
+        <th>Responsável</th>
+        <th>Prazo</th>
+        <th>Status</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
 
 <section id="brincadeiras">
-  <h2>Brincadeiras Juninas</h2>
+  <h2>🎉 Brincadeiras Juninas</h2>
   <ul>
-    <li><strong>Pescaria:</strong> Cada peixe tem uma pergunta para quebrar o gelo </li>
+    <li><strong>Pescaria:</strong> Cada peixe tem uma pergunta para quebrar o gelo.</li>
     <li><strong>Correio Elegante:</strong> Envie bilhetes fofos (ou engraçados) para alguém.</li>
-    <li><strong>Caipira Verdade ou Mentira:</strong> Um participante conta 2 fatos sobre sua trajetória profissional (ou curiosidades pessoais leves): 1 é mentira, 2 são verdade, os demais tentam adivinhar qual é a falsa.</li>
-    <li><strong>Bingo:</strong> Última brincadeira do evento com brindes surpresa!</li>
+    <li><strong>Caipira Verdade ou Mentira:</strong> Um participante conta 2 fatos sobre sua trajetória profissional (ou curiosidades leves). 1 é mentira, 2 são verdade. Os demais tentam adivinhar.</li>
+    <li><strong>Bingo:</strong> Última brincadeira do evento com brindes surpresa (colaborações como barras de chocolate e pizza são bem-vindas)!</li>
   </ul>
 </section>
 
+<section id="cronograma">
+  <h2>📅 Cronograma do Evento</h2>
+  <form id="form-cronograma">
+    <input type="text" id="hora" placeholder="Horário (ex: 18h00)" required />
+    <input type="text" id="atividade" placeholder="Atividade" required />
+    <input type="text" id="responsavel-crono" placeholder="Responsável" required />
+    <button type="submit">Adicionar ao Cronograma</button>
+  </form>
 
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script src="script.js"></script>
+  <table id="tabela-cronograma">
+    <thead>
+      <tr>
+        <th>Horário</th>
+        <th>Atividade</th>
+        <th>Responsável</th>
+        <th>Ação</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</section>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="script.js"></script>
 </body>
 </html>

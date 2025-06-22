@@ -103,3 +103,79 @@ input::placeholder {
   color: #a87b4a;
   opacity: 0.8;
 }
+
+/* Responsivo para telas pequenas (celular) */
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+
+  header {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  section {
+    padding: 10px;
+  }
+
+  table, thead, tbody, th, td, tr {
+    display: block;
+    width: 100%;
+  }
+
+  thead tr {
+    display: none; /* Esconde cabeçalho das tabelas para deixar mais clean */
+  }
+
+  tr {
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ffa500;
+  }
+
+  td {
+    padding-left: 50%;
+    position: relative;
+    border: none;
+    border-bottom: 1px solid #ccc;
+    text-align: left;
+  }
+
+  td::before {
+    position: absolute;
+    left: 10px;
+    top: 10px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    color: #8b4513;
+  }
+
+  #tabela-equipes tbody tr td:nth-of-type(1)::before { content: "Equipe"; }
+  #tabela-equipes tbody tr td:nth-of-type(2)::before { content: "Integrantes"; }
+  #tabela-equipes tbody tr td:nth-of-type(3)::before { content: "Representante"; }
+
+  
+  #tabela-tarefas tbody tr td:nth-of-type(1)::before { content: "Tarefa"; }
+  #tabela-tarefas tbody tr td:nth-of-type(2)::before { content: "Responsável"; }
+  #tabela-tarefas tbody tr td:nth-of-type(3)::before { content: "Prazo"; }
+  #tabela-tarefas tbody tr td:nth-of-type(4)::before { content: "Status"; }
+  #tabela-tarefas tbody tr td:nth-of-type(5)::before { content: "Ação"; }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  button {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 10px;
+  }
+
+  button {
+    padding: 12px;
+  }
+}
+

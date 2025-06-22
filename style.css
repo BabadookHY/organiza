@@ -17,21 +17,36 @@ header {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
-@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap');
 
-.logo {
-  font-family: 'UnifrakturCook', cursive;
-  font-size: 3.5em;
-  color: #b35f00; /* marrom rústico */
-  text-shadow:
-    2px 2px 0 #fff8dc,
-    4px 4px 0 #8b4513;
+.logo-decorada {
+  font-family: 'Rubik Mono One', sans-serif;
+  font-size: 2.8em;
+  color: #4b1e00; /* marrom escuro */
   text-align: center;
+  letter-spacing: 6px;
   margin-bottom: 10px;
-  letter-spacing: 0.1em;
-  user-select: none;
-  cursor: default;
+  text-transform: uppercase;
+  position: relative;
+  background-color: #fff0dc;
+  padding: 20px 10px;
+  border: 4px double #8b4513;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
+
+.organiza-texto {
+  color: #8b2d00;
+  text-shadow: 1px 1px 0 #ffecd1, 2px 2px 0 #b35600;
+}
+
+.risco {
+  font-size: 1.5em;
+  color: #ffb347;
+  margin: 0 15px;
+  vertical-align: middle;
+}
+
 
 h1 {
   font-size: 2em;

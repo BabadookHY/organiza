@@ -132,7 +132,7 @@ function carregarTarefas(equipeId) {
         <td><button class="excluir-tarefa">Excluir</button></td>
       `;
 
-      // Atualizar tarefa
+      // Atualizar tarefa no blur
       tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
         cell.addEventListener('blur', () => {
           const campos = ['descricao', 'responsavel', 'prazo', 'status'];
@@ -151,7 +151,7 @@ selectEquipe.addEventListener('change', () => {
   carregarTarefas(selectEquipe.value);
 });
 
-// nova equipe
+// Adicionar nova equipe
 formEquipe.addEventListener('submit', e => {
   e.preventDefault();
   const nome = document.getElementById('nome-equipe').value.trim();
@@ -159,3 +159,102 @@ formEquipe.addEventListener('submit', e => {
   const representante = document.getElementById('representante-equipe').value.trim();
 
   if (!nome || !integrantesStr) {
+    alert('Preencha o nome da equipe e os integrantes.');
+    return;
+  }
+
+  const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
+  db.ref('equipes').push({ nome, membros, representante });
+
+  e.target.reset();
+});
+
+// Adicionar tarefa
+formTarefa.addEventListener('submit', e => {
+  e.preventDefault();
+
+  const descricao = document.getElementById('tarefa').value.trim();
+  const responsavel = document.getElementById('responsavel').value.trim();
+  const prazo = document.getElementById('prazo').value;
+  const status = document.getElementById('status').value;
+  const equipeId = selectEquipe.value;
+
+  if (!equipeId) {
+    alert('Selecione uma equipe!');
+    return;
+  }
+
+  db.ref(`equipes/${equipeId}/tarefas`).push({ descricao, responsavel, prazo, status });
+
+  e.target.reset();
+});
+
+// Excluir tarefa
+tabelaTarefas.addEventListener('click', e => {
+  if (e.target.classList.contains('excluir-tarefa')) {
+    const tr = e.target.closest('tr');
+    const tarefaId = tr.dataset.tarefaId;
+    const equipeId = selectEquipe.value;
+
+    if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
+      db.ref(`equipes/${equipeId}/tarefas/${tarefaId}`).remove();
+    }
+  }
+});
+
+// --- Cronograma ---
+
+function carregarCronograma() {
+  db.ref('cronograma').on('value', snapshot => {
+    tabelaCronograma.innerHTML = '';
+    const atividades = snapshot.val() || {};
+
+    for (const id in atividades) {
+      const at = atividades[id];
+      const tr = document.createElement('tr');
+      tr.dataset.id = id;
+      tr.innerHTML = `
+        <td contenteditable="true">${at.horario}</td>
+        <td contenteditable="true">${at.atividade}</td>
+        <td contenteditable="true">${at.responsavel}</td>
+        <td><button class="excluir-cronograma">Excluir</button></td>
+      `;
+
+      tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
+        cell.addEventListener('blur', () => {
+          const campos = ['horario', 'atividade', 'responsavel'];
+          const campo = campos[i];
+          const novoValor = cell.textContent.trim();
+          db.ref(`cronograma/${id}/${campo}`).set(novoValor);
+        });
+      });
+
+      tr.querySelector('.excluir-cronograma').addEventListener('click', () => {
+        if (confirm('Deseja excluir esta atividade do cronograma?')) {
+          db.ref(`cronograma/${id}`).remove();
+        }
+      });
+
+      tabelaCronograma.appendChild(tr);
+    }
+  });
+}
+
+formCronograma.addEventListener('submit', e => {
+  e.preventDefault();
+  const horario = document.getElementById('hora').value.trim();
+  const atividade = document.getElementById('atividade').value.trim();
+  const responsavel = document.getElementById('responsavel-crono').value.trim();
+
+  if (!horario || !atividade || !responsavel) {
+    alert('Preencha todos os campos do cronograma!');
+    return;
+  }
+
+  db.ref('cronograma').push({ horario, atividade, responsavel });
+  formCronograma.reset();
+});
+
+// Inicializa tudo
+carregarEquipes();
+carregarCronograma();

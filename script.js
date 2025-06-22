@@ -1,11 +1,58 @@
+const firebaseConfig = {
+  apiKey: "AIzaSyAlsfMXLxQt5v7awej24qZO_HMn6Pa2NZE",
+  authDomain: "organiza-d4214.firebaseapp.com",
+  databaseURL: "https://organiza-d4214-default-rtdb.firebaseio.com",
+  projectId: "organiza-d4214",
+  storageBucket: "organiza-d4214.appspot.com",
+  messagingSenderId: "1035574288615",
+  appId: "1:1035574288615:web:de65023b21c335a1a20242",
+  measurementId: "G-TM90W9D7NQ"
+};
+
+firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
+
+const equipesIniciais = [
+  {
+    nome: "Planejamento",
+    membros: ["Bruno", "Eduarda F", "Anahlince", "Mikaelly"],
+    representante: "Bruno"
+  },
+  {
+    nome: "Network",
+    membros: ["Iris", "Raziel", "Charles", "Gabriel", "Gabi", "Fabricio"],
+    representante: "Iris"
+  },
+  {
+    nome: "Decoração",
+    membros: ["Ana", "Elaine", "João", "Eduarda H", "David", "Heloa"],
+    representante: "Ana"
+  },
+  {
+    nome: "Coffee Break",
+    membros: ["Ester", "Madu", "Julia", "Daiane", "Claudilene", "Jhemyson", "Werillon", "Guilherme"],
+    representante: "Julia"
+  }
+];
+
+// Inserir equipes iniciais na base se não existirem
+function inserirEquipesIniciais() {
+  db.ref("equipes").once("value", (snapshot) => {
+    if (!snapshot.exists()) {
+      equipesIniciais.forEach((equipe) => {
+        db.ref("equipes").push(equipe);
+      });
+    }
+  });
+}
+
+inserirEquipesIniciais();
 
 const form = document.getElementById('form-tarefa');
 const tabelaTarefas = document.getElementById('tabela-tarefas').querySelector('tbody');
 const selectEquipe = document.getElementById('select-equipe');
 const tabelaEquipesBody = document.getElementById('tabela-equipes').querySelector('tbody');
 
-// Carrega as equipes e atualiza o select e tabela
 function carregarEquipes() {
   db.ref('equipes').on('value', snapshot => {
     const equipes = snapshot.val() || {};
@@ -16,7 +63,6 @@ function carregarEquipes() {
 
     for (const equipeId in equipes) {
       const equipe = equipes[equipeId];
-
       const option = document.createElement('option');
       option.value = equipeId;
       option.textContent = equipe.nome;
@@ -31,13 +77,29 @@ function carregarEquipes() {
         <td contenteditable="true" data-tipo="membros" data-equipeid="${equipeId}">${membrosStr}</td>
         <td contenteditable="true" data-tipo="representante" data-equipeid="${equipeId}">${representante}</td>
       `;
+
+      tr.querySelectorAll('[contenteditable]').forEach(cell => {
+        cell.addEventListener('blur', (e) => {
+          const tipo = e.target.dataset.tipo;
+          const id = e.target.dataset.equipeid;
+          const valor = e.target.textContent.trim();
+
+          if (tipo === 'membros') {
+            const membros = valor.split(',').map(m => m.trim()).filter(Boolean);
+            db.ref(`equipes/${id}/membros`).set(membros);
+          } else if (tipo === 'representante') {
+            db.ref(`equipes/${id}/representante`).set(valor);
+          }
+        });
+      });
+
       tabelaEquipesBody.appendChild(tr);
+      if (!primeiraEquipeId) primeiraEquipeId = equipeId;
     }
 
-    if (Object.keys(equipes).length > 0) {
-      const primeiraId = Object.keys(equipes)[0];
-      selectEquipe.value = primeiraId;
-      carregarTarefas(primeiraId);
+    if (primeiraEquipeId) {
+      selectEquipe.value = primeiraEquipeId;
+      carregarTarefas(primeiraEquipeId);
     } else {
       tabelaTarefas.innerHTML = '';
     }
@@ -110,24 +172,6 @@ tabelaTarefas.addEventListener('click', e => {
   }
 });
 
-// Edição dos membros e representantes
-tabelaEquipesBody.addEventListener('blur', (e) => {
-  const cell = e.target;
-  const equipeId = cell.dataset.equipeid;
-  const tipo = cell.dataset.tipo;
-  const texto = cell.innerText.trim();
-
-  if (!equipeId || !tipo) return;
-
-  if (tipo === 'membros') {
-    const listaMembros = texto.split(',').map(m => m.trim()).filter(Boolean);
-    db.ref(`equipes/${equipeId}/membros`).set(listaMembros);
-  } else if (tipo === 'representante') {
-    db.ref(`equipes/${equipeId}/representante`).set(texto);
-  }
-}, true);
-
-// Criação de nova equipe
 document.getElementById('form-equipe').addEventListener('submit', (e) => {
   e.preventDefault();
 
@@ -136,7 +180,7 @@ document.getElementById('form-equipe').addEventListener('submit', (e) => {
   const representante = document.getElementById('representante-equipe').value.trim();
 
   if (!nome || !integrantesStr) {
-    alert("Preencha o nome da equipe e os integrantes.");
+    alert('Preencha o nome da equipe e os integrantes.');
     return;
   }
 

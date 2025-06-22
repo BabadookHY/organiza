@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Inserir equipes iniciais
+// equipes iniciais
 const equipesIniciais = [
   {
     nome: "Planejamento",
@@ -207,3 +207,56 @@ document.getElementById('form-equipe').addEventListener('submit', (e) => {
 });
 
 carregarEquipes();
+
+<script>
+const tabelaCronograma = document.getElementById('tabela-cronograma').querySelector('tbody');
+const formCronograma = document.getElementById('form-cronograma');
+
+function carregarCronograma() {
+  db.ref('cronograma').on('value', snapshot => {
+    tabelaCronograma.innerHTML = '';
+    const atividades = snapshot.val();
+    if (!atividades) return;
+
+    for (const id in atividades) {
+      const at = atividades[id];
+      const tr = document.createElement('tr');
+      tr.dataset.id = id;
+      tr.innerHTML = `
+        <td contenteditable="true">${at.horario}</td>
+        <td contenteditable="true">${at.atividade}</td>
+        <td contenteditable="true">${at.responsavel}</td>
+        <td><button class="excluir-cronograma">Excluir</button></td>
+      `;
+
+      tr.querySelectorAll('[contenteditable]').forEach((cell, index) => {
+        cell.addEventListener('blur', () => {
+          const novoValor = cell.textContent.trim();
+          const campo = ['horario', 'atividade', 'responsavel'][index];
+          db.ref(`cronograma/${id}/${campo}`).set(novoValor);
+        });
+      });
+
+      tr.querySelector('.excluir-cronograma').addEventListener('click', () => {
+        if (confirm('Deseja excluir esta atividade do cronograma?')) {
+          db.ref(`cronograma/${id}`).remove();
+        }
+      });
+
+      tabelaCronograma.appendChild(tr);
+    }
+  });
+}
+
+formCronograma.addEventListener('submit', e => {
+  e.preventDefault();
+  const horario = document.getElementById('horario').value;
+  const atividade = document.getElementById('atividade').value.trim();
+  const responsavel = document.getElementById('responsavel-crono').value.trim();
+  if (!horario || !atividade || !responsavel) return;
+  db.ref('cronograma').push({ horario, atividade, responsavel });
+  formCronograma.reset();
+});
+
+carregarCronograma();
+</script>

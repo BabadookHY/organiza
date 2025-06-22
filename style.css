@@ -17,6 +17,22 @@ header {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
 }
 
+@import url('https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap');
+
+.logo {
+  font-family: 'UnifrakturCook', cursive;
+  font-size: 3.5em;
+  color: #b35f00; /* marrom rústico */
+  text-shadow:
+    2px 2px 0 #fff8dc,
+    4px 4px 0 #8b4513;
+  text-align: center;
+  margin-bottom: 10px;
+  letter-spacing: 0.1em;
+  user-select: none;
+  cursor: default;
+}
+
 h1 {
   font-size: 2em;
   margin: 0;

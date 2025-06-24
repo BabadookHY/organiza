@@ -32,10 +32,8 @@ inserirEquipesIniciais();
 const formEquipe = document.getElementById('form-equipe');
 const tabelaEquipesBody = document.querySelector('#tabela-equipes tbody');
 const selectEquipe = document.getElementById('select-equipe');
-
 const formTarefa = document.getElementById('form-tarefa');
 const tabelaTarefas = document.querySelector('#tabela-tarefas tbody');
-
 const formCronograma = document.getElementById('form-cronograma');
 const tabelaCronograma = document.querySelector('#tabela-cronograma tbody');
 
@@ -44,8 +42,6 @@ function carregarEquipes() {
     const equipes = snapshot.val() || {};
     tabelaEquipesBody.innerHTML = '';
     selectEquipe.innerHTML = '<option value="" disabled selected>Selecione a equipe</option>';
-
-    let primeiraEquipeId = null;
 
     for (const id in equipes) {
       const equipe = equipes[id];
@@ -79,20 +75,9 @@ function carregarEquipes() {
       });
 
       tabelaEquipesBody.appendChild(tr);
-
-      if (!primeiraEquipeId) primeiraEquipeId = id;
     }
 
-    const ultimaEquipe = localStorage.getItem('equipeSelecionada');
-    if (ultimaEquipe && selectEquipe.querySelector(`option[value="${ultimaEquipe}"]`)) {
-      selectEquipe.value = ultimaEquipe;
-      carregarTarefas(ultimaEquipe);
-    } else if (primeiraEquipeId) {
-      selectEquipe.value = primeiraEquipeId;
-      carregarTarefas(primeiraEquipeId);
-    } else {
-      tabelaTarefas.innerHTML = '';
-    }
+    carregarTarefasTodasEquipes();
   });
 }
 
@@ -105,38 +90,45 @@ tabelaEquipesBody.addEventListener('click', e => {
   }
 });
 
-function carregarTarefas(equipeId) {
-  if (!equipeId) {
-    tabelaTarefas.innerHTML = '';
-    return;
-  }
-  db.ref(`equipes/${equipeId}/tarefas`).on('value', snapshot => {
-    tabelaTarefas.innerHTML = '';
-    const tarefas = snapshot.val() || {};
+function carregarTarefasTodasEquipes() {
+  tabelaTarefas.innerHTML = '';
 
-    for (const tarefaId in tarefas) {
-      const t = tarefas[tarefaId];
-      const tr = document.createElement('tr');
-      tr.dataset.tarefaId = tarefaId;
+  db.ref('equipes').once('value', snapshot => {
+    const equipes = snapshot.val() || {};
 
-      tr.innerHTML = `
-        <td contenteditable="true">${t.descricao}</td>
-        <td contenteditable="true">${t.responsavel}</td>
-        <td contenteditable="true">${t.prazo}</td>
-        <td contenteditable="true">${t.status}</td>
-        <td><button class="excluir-tarefa">Excluir</button></td>
-      `;
+    for (const equipeId in equipes) {
+      const equipe = equipes[equipeId];
+      const tarefas = equipe.tarefas || {};
 
-      tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
-        const campos = ['descricao', 'responsavel', 'prazo', 'status'];
-        cell.addEventListener('blur', () => {
-          const campo = campos[i];
-          const novoValor = cell.textContent.trim();
-          db.ref(`equipes/${equipeId}/tarefas/${tarefaId}/${campo}`).set(novoValor);
+      const trTitulo = document.createElement('tr');
+      trTitulo.innerHTML = `<td colspan="5" style="font-weight:bold; background:#eee">${equipe.nome}</td>`;
+      tabelaTarefas.appendChild(trTitulo);
+
+      for (const tarefaId in tarefas) {
+        const t = tarefas[tarefaId];
+        const tr = document.createElement('tr');
+        tr.dataset.tarefaId = tarefaId;
+        tr.dataset.equipeId = equipeId;
+
+        tr.innerHTML = `
+          <td contenteditable="true">${t.descricao}</td>
+          <td contenteditable="true">${t.responsavel}</td>
+          <td contenteditable="true">${t.prazo}</td>
+          <td contenteditable="true">${t.status}</td>
+          <td><button class="excluir-tarefa">Excluir</button></td>
+        `;
+
+        tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
+          const campos = ['descricao', 'responsavel', 'prazo', 'status'];
+          cell.addEventListener('blur', () => {
+            const campo = campos[i];
+            const novoValor = cell.textContent.trim();
+            db.ref(`equipes/${equipeId}/tarefas/${tarefaId}/${campo}`).set(novoValor);
+          });
         });
-      });
 
-      tabelaTarefas.appendChild(tr);
+        tabelaTarefas.appendChild(tr);
+      }
     }
   });
 }
@@ -144,7 +136,6 @@ function carregarTarefas(equipeId) {
 selectEquipe.addEventListener('change', () => {
   const equipeId = selectEquipe.value;
   localStorage.setItem('equipeSelecionada', equipeId);
-  carregarTarefas(equipeId);
 });
 
 formEquipe.addEventListener('submit', e => {
@@ -181,7 +172,7 @@ formTarefa.addEventListener('submit', e => {
   db.ref(`equipes/${equipeId}/tarefas`).push({ descricao, responsavel, prazo, status })
     .then(() => {
       e.target.reset();
-      carregarTarefas(equipeId); // ATUALIZA IMEDIATAMENTE A LISTA AO ADICIONAR
+      carregarTarefasTodasEquipes();
     });
 });
 
@@ -189,7 +180,7 @@ tabelaTarefas.addEventListener('click', e => {
   if (e.target.classList.contains('excluir-tarefa')) {
     const tr = e.target.closest('tr');
     const tarefaId = tr.dataset.tarefaId;
-    const equipeId = selectEquipe.value;
+    const equipeId = tr.dataset.equipeId;
 
     if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
       db.ref(`equipes/${equipeId}/tarefas/${tarefaId}`).remove();
@@ -197,7 +188,7 @@ tabelaTarefas.addEventListener('click', e => {
   }
 });
 
-// --- Cronograma ---
+// Cronograma
 function carregarCronograma() {
   db.ref('cronograma').on('value', snapshot => {
     tabelaCronograma.innerHTML = '';
@@ -249,7 +240,7 @@ formCronograma.addEventListener('submit', e => {
   formCronograma.reset();
 });
 
-// Inicializa tudo
+// === Inicialização ===
 carregarEquipes();
 carregarCronograma();
 
@@ -264,5 +255,3 @@ document.getElementById("gerar-pdf").addEventListener("click", () => {
   };
   html2pdf().set(opcoes).from(elementoParaPDF).save();
 });
-
-

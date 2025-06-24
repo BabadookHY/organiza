@@ -178,9 +178,11 @@ formTarefa.addEventListener('submit', e => {
     return;
   }
 
-  db.ref(`equipes/${equipeId}/tarefas`).push({ descricao, responsavel, prazo, status });
-
-  e.target.reset();
+  db.ref(`equipes/${equipeId}/tarefas`).push({ descricao, responsavel, prazo, status })
+    .then(() => {
+      e.target.reset();
+      carregarTarefas(equipeId); // ATUALIZA IMEDIATAMENTE A LISTA AO ADICIONAR
+    });
 });
 
 tabelaTarefas.addEventListener('click', e => {
@@ -262,4 +264,5 @@ document.getElementById("gerar-pdf").addEventListener("click", () => {
   };
   html2pdf().set(opcoes).from(elementoParaPDF).save();
 });
+
 

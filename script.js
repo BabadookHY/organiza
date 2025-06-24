@@ -12,7 +12,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// Equipes iniciais (opcional)
+// Equipes iniciais
 const equipesIniciais = [
   { nome: "Planejamento", membros: ["Bruno", "Eduarda F", "Anahlince", "Mikaelly"], representante: "Bruno" },
   { nome: "Network", membros: ["Iris", "Raziel", "Charles", "Gabriel", "Gabi", "Fabricio"], representante: "Iris" },
@@ -29,7 +29,6 @@ function inserirEquipesIniciais() {
 }
 inserirEquipesIniciais();
 
-// DOM elements
 const formEquipe = document.getElementById('form-equipe');
 const tabelaEquipesBody = document.querySelector('#tabela-equipes tbody');
 const selectEquipe = document.getElementById('select-equipe');
@@ -40,7 +39,6 @@ const tabelaTarefas = document.querySelector('#tabela-tarefas tbody');
 const formCronograma = document.getElementById('form-cronograma');
 const tabelaCronograma = document.querySelector('#tabela-cronograma tbody');
 
-// Carregar equipes e popular select e tabela
 function carregarEquipes() {
   db.ref('equipes').on('value', snapshot => {
     const equipes = snapshot.val() || {};
@@ -48,18 +46,17 @@ function carregarEquipes() {
     selectEquipe.innerHTML = '<option value="" disabled selected>Selecione a equipe</option>';
 
     let primeiraEquipeId = null;
+
     for (const id in equipes) {
       const equipe = equipes[id];
       const membrosStr = equipe.membros ? equipe.membros.join(', ') : '';
       const representante = equipe.representante || '';
 
-      // Option select
       const option = document.createElement('option');
       option.value = id;
       option.textContent = equipe.nome;
       selectEquipe.appendChild(option);
 
-      // Tabela equipes
       const tr = document.createElement('tr');
       tr.innerHTML = `
         <td>${equipe.nome}</td>
@@ -68,17 +65,14 @@ function carregarEquipes() {
         <td><button class="excluir-equipe" data-id="${id}">Excluir</button></td>
       `;
 
-      // Atualizar membros e representante no blur
       tr.querySelectorAll('[contenteditable]').forEach(cell => {
         cell.addEventListener('blur', e => {
           const tipo = e.target.dataset.tipo;
-          const id = e.target.dataset.id;
           const valor = e.target.textContent.trim();
-
           if (tipo === 'membros') {
             const membros = valor.split(',').map(m => m.trim()).filter(Boolean);
             db.ref(`equipes/${id}/membros`).set(membros);
-          } else if (tipo === 'representante') {
+          } else {
             db.ref(`equipes/${id}/representante`).set(valor);
           }
         });
@@ -89,8 +83,11 @@ function carregarEquipes() {
       if (!primeiraEquipeId) primeiraEquipeId = id;
     }
 
-    // Seleciona primeira equipe para carregar tarefas
-    if (primeiraEquipeId) {
+    const ultimaEquipe = localStorage.getItem('equipeSelecionada');
+    if (ultimaEquipe && selectEquipe.querySelector(`option[value="${ultimaEquipe}"]`)) {
+      selectEquipe.value = ultimaEquipe;
+      carregarTarefas(ultimaEquipe);
+    } else if (primeiraEquipeId) {
       selectEquipe.value = primeiraEquipeId;
       carregarTarefas(primeiraEquipeId);
     } else {
@@ -99,7 +96,6 @@ function carregarEquipes() {
   });
 }
 
-// Excluir equipe
 tabelaEquipesBody.addEventListener('click', e => {
   if (e.target.classList.contains('excluir-equipe')) {
     const id = e.target.dataset.id;
@@ -109,7 +105,6 @@ tabelaEquipesBody.addEventListener('click', e => {
   }
 });
 
-// Carregar tarefas da equipe selecionada
 function carregarTarefas(equipeId) {
   if (!equipeId) {
     tabelaTarefas.innerHTML = '';
@@ -132,10 +127,9 @@ function carregarTarefas(equipeId) {
         <td><button class="excluir-tarefa">Excluir</button></td>
       `;
 
-      // Atualizar tarefa no blur
       tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
+        const campos = ['descricao', 'responsavel', 'prazo', 'status'];
         cell.addEventListener('blur', () => {
-          const campos = ['descricao', 'responsavel', 'prazo', 'status'];
           const campo = campos[i];
           const novoValor = cell.textContent.trim();
           db.ref(`equipes/${equipeId}/tarefas/${tarefaId}/${campo}`).set(novoValor);
@@ -148,10 +142,11 @@ function carregarTarefas(equipeId) {
 }
 
 selectEquipe.addEventListener('change', () => {
-  carregarTarefas(selectEquipe.value);
+  const equipeId = selectEquipe.value;
+  localStorage.setItem('equipeSelecionada', equipeId);
+  carregarTarefas(equipeId);
 });
 
-// Adicionar nova equipe
 formEquipe.addEventListener('submit', e => {
   e.preventDefault();
   const nome = document.getElementById('nome-equipe').value.trim();
@@ -164,12 +159,11 @@ formEquipe.addEventListener('submit', e => {
   }
 
   const membros = integrantesStr.split(',').map(m => m.trim()).filter(Boolean);
-  db.ref('equipes').push({ nome, membros, representante });
-
-  e.target.reset();
+  db.ref('equipes').push({ nome, membros, representante }).then(() => {
+    formEquipe.reset();
+  });
 });
 
-// Adicionar tarefa
 formTarefa.addEventListener('submit', e => {
   e.preventDefault();
 
@@ -189,7 +183,6 @@ formTarefa.addEventListener('submit', e => {
   e.target.reset();
 });
 
-// Excluir tarefa
 tabelaTarefas.addEventListener('click', e => {
   if (e.target.classList.contains('excluir-tarefa')) {
     const tr = e.target.closest('tr');
@@ -203,7 +196,6 @@ tabelaTarefas.addEventListener('click', e => {
 });
 
 // --- Cronograma ---
-
 function carregarCronograma() {
   db.ref('cronograma').on('value', snapshot => {
     tabelaCronograma.innerHTML = '';
@@ -221,8 +213,8 @@ function carregarCronograma() {
       `;
 
       tr.querySelectorAll('[contenteditable]').forEach((cell, i) => {
+        const campos = ['horario', 'atividade', 'responsavel'];
         cell.addEventListener('blur', () => {
-          const campos = ['horario', 'atividade', 'responsavel'];
           const campo = campos[i];
           const novoValor = cell.textContent.trim();
           db.ref(`cronograma/${id}/${campo}`).set(novoValor);
@@ -260,7 +252,7 @@ carregarEquipes();
 carregarCronograma();
 
 document.getElementById("gerar-pdf").addEventListener("click", () => {
-  const elementoParaPDF = document.body; // pode trocar por uma div específica se quiser
+  const elementoParaPDF = document.body;
   const opcoes = {
     margin: 0.3,
     filename: 'resumo-evento-network.pdf',
